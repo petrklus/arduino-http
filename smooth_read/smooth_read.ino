@@ -28,8 +28,8 @@ void loop(){
   int readingA3 = smooth_A3.read();
   int readingA4 = smooth_A4.read();  
   int readingA5 = smooth_A5.read();
-
-  if (millis() - last_sent > INTERVAL_millis) {
+    
+  if (millis() - last_sent > INTERVAL_millis) {   
     Serial.print("[[");
     Serial.print(readingA0); Serial.print(";");
     Serial.print(readingA1); Serial.print(";");
@@ -40,6 +40,5 @@ void loop(){
     Serial.println("]]");    
     last_sent = millis();
   }
-
-  delay(100); //just here to slow down the output for easier reading
+  delay(300);
 }
