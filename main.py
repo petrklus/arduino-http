@@ -158,6 +158,49 @@ def determine_state():
         current_state["state_standby"] = False
 
 
+# TODO - push to OpenHab
+# http://192.168.2.201:8080/rest/items/Temp_Fridge
+CONFIG = {
+    "openhab_ip"   : "192.168.2.201",
+    "openahb_port" : "8080",    
+    "prefix"       : "ArdVal_Garden_",
+    "push_ids"     : ["A0", "A1", "A2"],
+}
+
+
+
+import requests
+def push_to_openhab(item, value):
+    # TODO DEBUG - remove
+    # item = "ArdVal_GardenTemp"
+    payload = str(value)
+    headers = {'content-type': "text/plain"}
+    r = requests.post(
+        "http://{}:{}/rest/items/{}".format(
+            CONFIG["openhab_ip"],
+            CONFIG["openahb_port"],
+            item), 
+        data=payload,
+        headers=headers
+    )
+    if not r.ok:
+        logging.warn(
+            "Unable to push {}: {}".format(
+                item,
+                r.reason
+            )
+        )
+    else:
+        # all good!
+        logging.debug(
+            "success: {} stored for {}".format(
+                value,
+                item                
+            )
+        )
+    
+    
+
 ##### command receiving processing
 lines = collections.deque(maxlen=50)
 
@@ -171,6 +214,10 @@ def store_read(key, val):
             current_state[key] = items    
         items.append(val)
 
+    if key in CONFIG["push_ids"]:
+        openhab_id = "{}{}".format(CONFIG["prefix"], key)
+        # push to openhab, maybe in background?
+        push_to_openhab(openhab_id, sum(items)/float(len(items)))
 
 def generate_output():
     with state_lock:
@@ -179,6 +226,9 @@ def generate_output():
             output[key] = sum(val)/float(SMOOTH_SIZE)
 
     return output
+
+
+
 
 
 def command_reader():
@@ -191,25 +241,36 @@ def command_reader():
                 lines.append("{}: {}".format(time_formatted, str(a[1]).strip()))                
                 # now parse the command:                
                 text_contents = a[1].strip()
+                logging.debug("Processing packet: {}".format(text_contents))                
                 if text_contents[:2] != "[[" or text_contents[-2:] != "]]":
                     raise Exception(
                         "Invalid packet start {}".format(text_contents))
-                    
                 readings = text_contents[2:-2].split(";")
                 for i, reading in enumerate(readings):
-                    try:                        
-                        key = "A{}".format(i)
-                        store_read(key, float(reading))                      
-                    except ValueError, e:
-                        print "Error: {}".format(e)
-                        # invalid combination, ignore..
-                        # TODO paste error message..
-                        continue                
+                    if reading.strip():
+                        try:                        
+                            key = "A{}".format(i)
+                            store_read(key, float(reading))               
+                        except ValueError, e:
+                            logging.debug("Error parsing: {}".format(e))
+                            # invalid combination, ignore..
+                            # TODO paste error message..
+                            continue                
                         
         except Exception as e:
-            msg = "Error receive: {}".format(e)
-            print msg
+            logging.info("Unable to parse packet: {}".format(e))
 
+
+
+
+"""
+
+item = "ArdVal_GardenTemp"
+payload = {'key1': 'value1', 'key2': 'value2'}
+r = requests.post("http://httpbin.org/post", data=payload)
+print r.text
+
+"""
 
 ##### web routing
 @route('/hello/<name>')
