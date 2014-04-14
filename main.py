@@ -204,7 +204,7 @@ def push_to_openhab(item, value):
 ##### command receiving processing
 lines = collections.deque(maxlen=50)
 
-SMOOTH_SIZE = 5
+SMOOTH_SIZE = 10
 def store_read(key, val):
     with state_lock:
         if key in current_state.keys():
@@ -223,7 +223,7 @@ def generate_output():
     with state_lock:
         output = dict()
         for key, val in current_state.iteritems():
-            output[key] = sum(val)/float(SMOOTH_SIZE)
+            output[key] = sum(val)/float(len(val))
 
     return output
 
