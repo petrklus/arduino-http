@@ -319,8 +319,7 @@ if __name__=="__main__":
         print "Config loaded:"
         pprint.pprint(CONFIG)
     except Exception, e:
-        logging.exception("Unable to read config, please create",   \
-              "config.yaml following a sample")
+        logging.exception("Unable to read config, please create config.yaml following a sample")
         sys.exit(1)
     
     
