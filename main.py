@@ -198,7 +198,7 @@ def push_to_openhab(item, value):
 ##### command receiving processing
 lines = collections.deque(maxlen=50)
 
-SMOOTH_SIZE = 40
+SMOOTH_SIZE = 80
 def store_read(key, val):
     with state_lock:
         if key in current_state.keys():
