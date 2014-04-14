@@ -337,7 +337,7 @@ if __name__=="__main__":
     else:
         ser = IRSerialCommunicator(
             dataQ, errQ, 
-            port=CONFIG["arduino_port"], baudrate=19200)
+            port=CONFIG["arduino_port"], baudrate=CONFIG["arduino_baudrate"])
     ser.daemon = True
     ser.start()
         

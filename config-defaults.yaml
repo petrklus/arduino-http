@@ -1,11 +1,12 @@
 # openhab URL to push notifications to
-openhab_ip:     192.168.2.201
+openhab_ip:         192.168.2.201
 # openhab port
-openahb_port:   8080
+openahb_port:       8080
 # reading prefix to push (for example, A0 will be pushed as prefixA0)
-prefix:         arduino prefix
+prefix:             arduino prefix
 # connection point of the Arduino
-arduino_port:   /dev/tty.usbmodem1411
+arduino_port:       /dev/tty.usbmodem1411
+arduino_baudrate:   19200
 # which analog inputs to push
 push_ids: 
     - A0
