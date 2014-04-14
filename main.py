@@ -350,4 +350,4 @@ if __name__=="__main__":
     
     # run webserver to get status/log messages
     # run(server='cherrypy', host='0.0.0.0', port=8080)
-    run(host='0.0.0.0', port=8080)
+    run(host='0.0.0.0', port=CONFIG["webserver_port"])

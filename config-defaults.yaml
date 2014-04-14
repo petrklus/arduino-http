@@ -7,6 +7,10 @@ prefix:             arduino prefix
 # connection point of the Arduino
 arduino_port:       /dev/tty.usbmodem1411
 arduino_baudrate:   19200
+
+webserver_port:     8081
+
+
 # which analog inputs to push
 push_ids: 
     - A0
