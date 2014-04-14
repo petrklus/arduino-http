@@ -299,8 +299,10 @@ get_voltage = lambda x: x * (5.0 / 1023.0)
 get_temp = lambda x: get_voltage(x) * 125/3.0 -40
 import pprint
 if __name__=="__main__":    
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARN) # logging.DEBUG
     print "Arduino loader loading..."
-    
+        
     # read config parameters
     try: 
         # load up defaults
@@ -313,11 +315,12 @@ if __name__=="__main__":
             for key, val in yaml.safe_load(fp).iteritems():                
                 CONFIG[key] = val
         
+        logging.info("Config loaded: {}".format(pprint.pformat(CONFIG)))
         print "Config loaded:"
         pprint.pprint(CONFIG)
     except Exception, e:
-        print "Unable to read config, please create",   \
-              "config.yaml following a sample"
+        logging.exception("Unable to read config, please create",   \
+              "config.yaml following a sample")
         sys.exit(1)
     
     
