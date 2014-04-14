@@ -32,3 +32,10 @@ then
     Temp_Garden_Soil.postUpdate(ArdVal_Garden_A1_adc)    
 end
 ```
+
+# debug
+
+```
+http://192.168.2.201:8080/rest/items/ArdVal_Garden_A1
+http://192.168.2.201:8080/rest/items/Temp_Garden_Soil
+```
