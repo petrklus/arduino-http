@@ -1,0 +1,10 @@
+openhab_ip:     192.168.2.201
+openahb_port:   8080
+prefix:         ArdVal_Garden_
+arduino_port:   /dev/tty.usbmodem1411
+push_ids: 
+    - A0
+    - A1
+    - A2
+
+    

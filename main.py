@@ -9,10 +9,11 @@ import threading, Queue
 import logging
 import struct
 import collections
+import yaml
 
 from bottle import route, run, template
 import time
-
+import sys
 
 """
 logging.basicConfig(filename=__file__.replace('.py','.log'),level=logging.DEBUG,format='%(asctime)s [%(name)s.%(funcName)s] %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filemode='a')
@@ -160,13 +161,6 @@ def determine_state():
 
 # TODO - push to OpenHab
 # http://192.168.2.201:8080/rest/items/Temp_Fridge
-CONFIG = {
-    "openhab_ip"   : "192.168.2.201",
-    "openahb_port" : "8080",    
-    "prefix"       : "ArdVal_Garden_",
-    "push_ids"     : ["A0", "A1", "A2"],
-}
-
 
 
 import requests
@@ -204,7 +198,7 @@ def push_to_openhab(item, value):
 ##### command receiving processing
 lines = collections.deque(maxlen=50)
 
-SMOOTH_SIZE = 10
+SMOOTH_SIZE = 40
 def store_read(key, val):
     with state_lock:
         if key in current_state.keys():
@@ -226,8 +220,6 @@ def generate_output():
             output[key] = sum(val)/float(len(val))
 
     return output
-
-
 
 
 
@@ -305,11 +297,31 @@ The sensor has a simple 3 wire interface: ground, power, and output,  and  is po
 """
 get_voltage = lambda x: x * (5.0 / 1023.0)
 get_temp = lambda x: get_voltage(x) * 125/3.0 -40
-
+import pprint
 if __name__=="__main__":    
+    print "Arduino loader loading..."
+    
+    # read config parameters
+    try: 
+        # load up defaults
+        with open("config-defaults.yaml") as fp:
+            CONFIG = yaml.safe_load(fp)
+        
+        # load overrides
+        with open("config.yaml") as fp:
+            # over-write anything in config.yaml
+            for key, val in yaml.safe_load(fp).iteritems():                
+                CONFIG[key] = val
+        
+        print "Config loaded:"
+        pprint.pprint(CONFIG)
+    except Exception, e:
+        print "Unable to read config, please create",   \
+              "config.yaml following a sample"
+        sys.exit(1)
+    
     
     # TODO make this configurable
-    port = "/dev/tty.usbmodem1411"
     dataQ = Queue.Queue(maxsize=100)
     errQ = Queue.Queue(maxsize=100)
 
@@ -320,22 +332,19 @@ if __name__=="__main__":
         s_name = os.ttyname(slave)
         ser = IRSerialCommunicator(dataQ, errQ, port=s_name, baudrate=9600)
     else:
-        ser = IRSerialCommunicator(dataQ, errQ, port=port, baudrate=19200)
+        ser = IRSerialCommunicator(
+            dataQ, errQ, 
+            port=CONFIG["arduino_port"], baudrate=19200)
     ser.daemon = True
     ser.start()
-    
-    
-    # start command dispatcher    
+        
+    # start command reader
     num_worker_threads = 1
     for i in range(num_worker_threads):
-         # t = threading.Thread(target=command_sender)
-         # t.daemon = True
-         # t.start()
-         # star
          t = threading.Thread(target=command_reader)
          t.daemon = True
          t.start()
     
-    # run webserver
+    # run webserver to get status/log messages
     # run(server='cherrypy', host='0.0.0.0', port=8080)
     run(host='0.0.0.0', port=8080)
