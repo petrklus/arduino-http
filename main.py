@@ -14,7 +14,7 @@ import yaml
 from bottle import route, run, template
 import time
 import sys
-
+import glob
 """
 logging.basicConfig(filename=__file__.replace('.py','.log'),level=logging.DEBUG,format='%(asctime)s [%(name)s.%(funcName)s] %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filemode='a')
 """
@@ -26,8 +26,7 @@ class IRSerialCommunicator(threading.Thread):
         self.logger.debug('initializing')
         threading.Thread.__init__(self)
         self.port = port
-        self.ser = serial.Serial(port, baudrate)
-        self.ser.timeout = 1
+        self.init_serial()
         #self.ser.flushInput()
         self.readCount = 0
         self.sleepDurSec = 5
@@ -42,7 +41,12 @@ class IRSerialCommunicator(threading.Thread):
         self.ver = 0.1
 
     def init_serial(self):
-        self.ser = serial.Serial(self.port, self.baudrate)
+        # allows use of the port as a prefix!
+        list_ports = glob.glob("{}*".format(self.port))
+        if not list_ports:
+            raise Exception("Init failed - no valid port prefixes found")   
+        port = list_ports[0]        
+        self.ser = serial.Serial(port, self.baudrate)
         self.ser.timeout = 1
 
     def run(self):
