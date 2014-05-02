@@ -71,6 +71,7 @@ class IRSerialCommunicator(threading.Thread):
                     
             except serial.serialutil.SerialException, se:                       
                 msg = 'Comms error, retrying..{}'.format(se)
+                time.sleep(2)
                 logging.warn(msg)
                 try:
                     old_ser = self.ser
