@@ -42,7 +42,7 @@ class IRSerialCommunicator(threading.Thread):
         self.ver = 0.1
 
     def init_serial(self):
-        self.ser = serial.Serial(port, self.baudrate)
+        self.ser = serial.Serial(self.port, self.baudrate)
         self.ser.timeout = 1
 
     def run(self):
