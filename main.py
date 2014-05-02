@@ -21,7 +21,7 @@ logging.basicConfig(filename=__file__.replace('.py','.log'),level=logging.DEBUG,
 
 # from http://stackoverflow.com/questions/18752980/reading-serial-data-from-arduino-with-python
 class IRSerialCommunicator(threading.Thread):
-    def __init__(self, dataQ, errQ, port, baudrate=115200):
+    def __init__(self, dataQ, errQ, port, baudrate=19200):
         self.logger = logging.getLogger('IRSerialCommunicator')
         self.logger.debug('initializing')
         threading.Thread.__init__(self)
@@ -45,8 +45,9 @@ class IRSerialCommunicator(threading.Thread):
         # allows use of the port as a prefix!
         list_ports = glob.glob("{}*".format(self.port))
         if not list_ports:
-            raise Exception("Init failed - no valid port prefixes found")   
+            raise Exception("Init failed - no valid port prefixes found") 
         port = list_ports[0]        
+        logging.warn("Starting comms on port: {}".format(port))  
         self.ser = serial.Serial(port, self.baudrate)
         self.ser.timeout = 1
 
