@@ -74,12 +74,12 @@ class IRSerialCommunicator(threading.Thread):
                 time.sleep(2)
                 logging.warn(msg)
                 try:
-                    old_ser = self.ser
-                    self.init_serial()
                     old_ser.close()
                 except Exception, e:
                     pass
-            
+                    
+                self.init_serial()
+                
             # wait between retries
             time.sleep(4)
   
