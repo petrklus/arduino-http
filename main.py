@@ -76,9 +76,12 @@ class IRSerialCommunicator(threading.Thread):
                 try:
                     self.ser.close()
                 except Exception, e:
+                    logging.warn(e)                
+                try:
+                    self.init_serial()                    
+                except Exception, e:
                     logging.warn(e)
-                    
-                self.init_serial()
+                  
                 
             # wait between retries
             time.sleep(4)
