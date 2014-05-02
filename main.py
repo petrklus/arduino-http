@@ -81,7 +81,6 @@ class IRSerialCommunicator(threading.Thread):
             
             # wait between retries
             time.sleep(4)
-            sys.exit(1) # die on exit, let autorun re-start it
   
         self.dat.close()
         self.close()
