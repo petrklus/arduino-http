@@ -25,6 +25,7 @@ class IRSerialCommunicator(threading.Thread):
         self.logger = logging.getLogger('IRSerialCommunicator')
         self.logger.debug('initializing')
         threading.Thread.__init__(self)
+        self.port = port
         self.ser = serial.Serial(port, baudrate)
         self.ser.timeout = 1
         #self.ser.flushInput()
@@ -40,24 +41,44 @@ class IRSerialCommunicator(threading.Thread):
         self.inputStarted = False
         self.ver = 0.1
 
+    def init_serial(self):
+        self.ser = serial.Serial(port, self.baudrate)
+        self.ser.timeout = 1
+
     def run(self):
         self.logger.debug('Serial reader running')
         dataIn = False
         while not self.stoprequest.isSet():
-          if not self.isOpen():
-            self.connectForStream()
+            try:
+                
+                if not self.isOpen():
+                    self.connectForStream()
 
-          while self.keepAlive:
-            dat = self.ser.readline()
-            # some data validation goes here before adding to Queue...
-            if len(dat) > 2:
-                self.dataQ.put([time.time(), dat])
-            if not self.inputStarted:
-                self.logger.debug('reading')
-            self.inputStarted = True
-          self.dat.close()
-          self.close()
-          self.join_fin()
+                while self.keepAlive:
+                    dat = self.ser.readline()
+                    # some data validation goes here before adding to Queue...
+                    if len(dat) > 2:
+                        self.dataQ.put([time.time(), dat])
+                    if not self.inputStarted:
+                        self.logger.debug('reading')
+                    self.inputStarted = True
+                    
+            except serial.serialutil.SerialException, se:                       
+                msg = 'Comms error, retrying..{}'.format(se)
+                logging.warn(msg)
+                try:
+                    old_ser = self.ser
+                    self.init_serial()
+                    old_ser.close()
+                except Exception, e:
+                    pass
+            
+            # wait between retries
+            time.sleep(4)
+  
+        self.dat.close()
+        self.close()
+        self.join_fin()
 
     def join_fin(self):
         self.logger.debug('stopping')
