@@ -76,7 +76,7 @@ class IRSerialCommunicator(threading.Thread):
                 try:
                     self.ser.close()
                 except Exception, e:
-                    pass
+                    logging.warn(e)
                     
                 self.init_serial()
                 
