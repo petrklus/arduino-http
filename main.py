@@ -26,6 +26,7 @@ class IRSerialCommunicator(threading.Thread):
         self.logger.debug('initializing')
         threading.Thread.__init__(self)
         self.port = port
+        self.baudrate = baudrate
         self.init_serial()
         #self.ser.flushInput()
         self.readCount = 0
